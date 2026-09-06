@@ -1,1 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>一键连接 · Minecraft BE 服务器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0d111f;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 640px;
+            width: 100%;
+            background: #181e2f;
+            border-radius: 44px;
+            padding: 28px 24px 32px;
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            border: 1px solid #2f3650;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #eef3fc;
+            font-weight: 650;
+            font-size: 26px;
+            letter-spacing: -0.3px;
+        }
+        .header h1 small {
+            font-size: 15px;
+            font-weight: 400;
+            background: #28304a;
+            padding: 4px 14px;
+            border-radius: 40px;
+            color: #b0bddb;
+            border: 1px solid #3d4669;
+        }
+        .badge {
+            background: #1f2740;
+            border-radius: 40px;
+            padding: 6px 16px;
+            color: #b8c4e5;
+            font-size: 14px;
+            border: 1px solid #3b4468;
+        }
+        .subhead {
+            color: #9ba6ca;
+            font-size: 15px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #29304b;
+            margin-bottom: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+        .subhead span {
+            background: #1f2740;
+            padding: 2px 14px;
+            border-radius: 30px;
+            border: 1px solid #3d466b;
+            font-size: 13px;
+            color: #c9d3f0;
+        }
+        .input-area {
+            margin-bottom: 30px;
+        }
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            color: #d0d9f0;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+        .input-label i {
+            background: #212a44;
+            padding: 0 14px;
+            border-radius: 40px;
+            font-size: 13px;
+            color: #a7b3db;
+            border: 1px solid #3a4368;
+            font-style: normal;
+        }
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            background: #131a2b;
+            padding: 4px 4px 4px 20px;
+            border-radius: 80px;
+            border: 1px solid #353e60;
+            transition: 0.2s;
+        }
+        .input-row:focus-within {
+            border-color: #6f83d1;
+            box-shadow: 0 0 0 3px rgba(80, 115, 220, 0.25);
+            background: #101725;
+        }
+        .input-row input {
+            flex: 1;
+            min-width: 150px;
+            background: transparent;
+            border: none;
+            padding: 16px 6px 16px 0;
+            font-size: 16px;
+            color: #ecf2fd;
+            outline: none;
+            font-weight: 450;
+        }
+        .input-row input::placeholder {
+            color: #56608a;
+            font-size: 15px;
+        }
+        .input-row button {
+            background: #4f65a0;
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 11px 28px;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.15s;
+            border: 1px solid #687ec2;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            white-space: nowrap;
+            letter-spacing: 0.4px;
+        }
+        .input-row button:hover {
+            background: #5d78b5;
+            border-color: #7e93d4;
+            transform: scale(0.97);
+        }
+        .input-row button:active {
+            background: #3f5285;
+            transform: scale(0.94);
+        }
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 18px 0 12px 0;
+            color: #c4ceec;
+            font-weight: 500;
+            padding: 0 4px;
+        }
+        .list-header span:first-child {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .list-header .count {
+            background: #1e2742;
+            padding: 0 16px;
+            border-radius: 40px;
+            font-size: 14px;
+            border: 1px solid #3a436a;
+        }
+        .server-list {
+            background: #131a2b;
+            border-radius: 28px;
+            padding: 6px 4px;
+            border: 1px solid #2f3655;
+            max-height: 360px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #3d4a74 #131a2b;
+        }
+        .server-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .server-list::-webkit-scrollbar-track {
+            background: #0f1423;
+            border-radius: 10px;
+        }
+        .server-list::-webkit-scrollbar-thumb {
+            background: #46537e;
+            border-radius: 10px;
+        }
+        .server-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            margin: 4px 6px;
+            background: #1c243d;
+            border-radius: 60px;
+            border: 1px solid #2f385b;
+            flex-wrap: wrap;
+            gap: 10px 6px;
+            transition: 0.1s;
+        }
+        .server-item:hover {
+            background: #222b49;
+            border-color: #445082;
+        }
+        .server-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 2;
+            min-width: 130px;
+        }
+        .server-addr {
+            font-weight: 600;
+            color: #e7edff;
+            font-size: 16px;
+            word-break: break-all;
+        }
+        .server-port {
+            font-size: 13px;
+            color: #8d9ac6;
+            background: #101a2e;
+            padding: 0 14px;
+            border-radius: 30px;
+            display: inline-block;
+            width: fit-content;
+            border: 1px solid #334066;
+        }
+        .server-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .server-actions .connect-link {
+            background: #3d5a94;
+            border: 1px solid #5b78bc;
+            color: white;
+            padding: 8px 22px;
+            border-radius: 60px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+            letter-spacing: 0.2px;
+        }
+        .server-actions .connect-link:hover {
+            background: #4e70b0;
+            border-color: #738cd6;
+            transform: scale(0.97);
+        }
+        .server-actions .connect-link:active {
+            background: #314a7a;
+            transform: scale(0.94);
+        }
+        .server-actions .remove-btn {
+            background: #352f46;
+            border: 1px solid #544b6b;
+            color: #cfc6e6;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.1s;
+            font-weight: 500;
+        }
+        .server-actions .remove-btn:hover {
+            background: #4d3f5c;
+            border-color: #735d7e;
+            color: #efe6ff;
+        }
+        .empty-state {
+            color: #6873a0;
+            text-align: center;
+            padding: 36px 12px;
+            font-size: 16px;
+        }
+        .empty-state i {
+            background: #1b2340;
+            padding: 6px 20px;
+            border-radius: 60px;
+            border: 1px dashed #3d4877;
+            font-style: normal;
+        }
+        .footer-actions {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+            border-top: 1px solid #272f4d;
+            padding-top: 22px;
+        }
+        .footer-actions button {
+            background: transparent;
+            border: 1px solid #3a436a;
+            color: #b3bee5;
+            padding: 8px 24px;
+            border-radius: 60px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.15s;
+            font-weight: 450;
+        }
+        .footer-actions button:hover {
+            background: #1f2846;
+            border-color: #5c6ba0;
+            color: #e4edff;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #141d35;
+            color: #d6e0fc;
+            padding: 14px 32px;
+            border-radius: 80px;
+            border: 1px solid #5c71b0;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            font-weight: 500;
+            font-size: 15px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+            z-index: 999;
+            white-space: nowrap;
+        }
+        .toast.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        @media (max-width: 480px) {
+            .container { padding: 20px 14px; }
+            .input-row { padding-left: 16px; }
+            .server-item { flex-direction: column; align-items: stretch; }
+            .server-actions { justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>
+            ⛏️ 一键连接
+            <small>BE 1.20+</small>
+        </h1>
+        <div class="badge">⚡ 点击链接跳转游戏</div>
+    </div>
+    <div class="subhead">
+        <span>📌 添加服务器</span>
+        <span>格式: 地址:端口</span>
+        <span style="background: #1b2440; border-color:#3f4a78;">点击「连接」直接启动</span>
+    </div>
 
+    <div class="input-area">
+        <div class="input-label">
+            <span>🌐 服务器地址</span>
+            <i>例如 play.example.com:19132</i>
+        </div>
+        <div class="input-row">
+            <input type="text" id="serverInput" placeholder="mc.example.com:19132" spellcheck="false" autocomplete="off">
+            <button id="addServerBtn">➕ 导入</button>
+        </div>
+    </div>
+
+    <div class="list-header">
+        <span>📋 我的服务器</span>
+        <span class="count" id="serverCount">0</span>
+    </div>
+    <div class="server-list" id="serverListContainer">
+        <div class="empty-state"><i>✨ 添加服务器，点击即连</i></div>
+    </div>
+
+    <div class="footer-actions">
+        <button id="clearAllBtn">🗑️ 清空全部</button>
+        <button id="exampleBtn">📌 添加示例</button>
+        <span style="color: #5d6a97; font-size: 13px; display: inline-flex; align-items: center;">点击连接自动跳转</span>
+    </div>
+</div>
+
+<div id="toastMessage" class="toast"></div>
+
+<script>
+    (function(){
+        const STORAGE_KEY = 'mcbe_server_list_quick';
+        let servers = [];
+
+        // ----- 存储 -----
+        function loadServers() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) {
+                        servers = parsed.filter(s => s && typeof s.address === 'string' && typeof s.port === 'string');
+                        return;
+                    }
+                }
+            } catch (_) {}
+            servers = [];
+        }
+
+        function saveServers() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(servers));
+            } catch (_) {}
+        }
+
+        // ----- 解析与添加 -----
+        function parseServerInput(raw) {
+            let trimmed = raw.trim();
+            if (!trimmed) return null;
+            let addressPart, portPart;
+            if (trimmed.includes(':')) {
+                const idx = trimmed.lastIndexOf(':');
+                addressPart = trimmed.substring(0, idx).trim();
+                portPart = trimmed.substring(idx + 1).trim();
+            } else {
+                addressPart = trimmed;
+                portPart = '19132';
+            }
+            if (!addressPart) return null;
+            if (!/^\d+$/.test(portPart)) return null;
+            const portNum = parseInt(portPart, 10);
+            if (portNum < 1 || portNum > 65535) return null;
+            return { address: addressPart, port: portPart };
+        }
+
+        function addServer(address, port) {
+            address = address.trim();
+            port = port.trim();
+            if (!address || !port) return false;
+            const exists = servers.some(s => 
+                s.address.toLowerCase() === address.toLowerCase() && s.port === port
+            );
+            if (exists) {
+                showToast('⚠️ 服务器已存在');
+                return false;
+            }
+            servers.push({ address, port });
+            saveServers();
+            renderServerList();
+            showToast(`✅ 已导入 ${address}:${port}`);
+            return true;
+        }
+
+        function removeServer(index) {
+            if (index >= 0 && index < servers.length) {
+                const removed = servers[index];
+                servers.splice(index, 1);
+                saveServers();
+                renderServerList();
+                showToast(`已移除 ${removed.address}:${removed.port}`);
+            }
+        }
+
+        function clearAllServers() {
+            if (servers.length === 0) {
+                showToast('列表已经是空的');
+                return;
+            }
+            if (confirm('确定清空所有服务器吗？')) {
+                servers = [];
+                saveServers();
+                renderServerList();
+                showToast('已清空所有服务器');
+            }
+        }
+
+        function addExampleServers() {
+            const examples = [
+                { address: 'play.netherite.net', port: '19132' },
+                { address: 'mc.example.com', port: '19132' },
+                { address: 'bedrock.pvpcraft.net', port: '19132' }
+            ];
+            let added = 0;
+            for (const ex of examples) {
+                const exists = servers.some(s => 
+                    s.address.toLowerCase() === ex.address.toLowerCase() && s.port === ex.port
+                );
+                if (!exists) {
+                    servers.push({ address: ex.address, port: ex.port });
+                    added++;
+                }
+            }
+            if (added > 0) {
+                saveServers();
+                renderServerList();
+                showToast(`✅ 添加了 ${added} 个示例服务器`);
+            } else {
+                showToast('示例服务器已存在');
+            }
+        }
+
+        // ----- 核心: 生成 minecraft:// 链接并跳转 -----
+        function connectToServer(address, port) {
+            // 构建 Bedrock 专用链接: minecraft://?addExternalServer=名称|地址:端口
+            // 使用地址作为名称 (简单处理)
+            const name = address.length > 20 ? address.substring(0, 18) + '..' : address;
+            // 对名称进行url编码，但保留可读性，同时处理特殊字符
+            const encodedName = encodeURIComponent(name);
+            const serverAddress = `${address}:${port}`;
+            // 标准格式: minecraft://?addExternalServer=名称|地址:端口
+            const url = `minecraft://?addExternalServer=${encodedName}|${serverAddress}`;
+            
+            // 尝试跳转
+            try {
+                window.location.href = url;
+                showToast(`🚀 正在连接 ${address}:${port} ...`);
+                // 如果跳转失败，部分浏览器会阻止，但多数移动端会唤起游戏
+                // 5秒后提示如果未跳转
+                setTimeout(() => {
+                    showToast(`如果游戏未启动，请手动输入 /connect ${address}:${port}`);
+                }, 3500);
+            } catch (e) {
+                showToast(`⚠️ 无法跳转，请手动输入 /connect ${address}:${port}`);
+            }
+        }
+
+        // ----- 渲染列表 -----
+        function renderServerList() {
+            const container = document.getElementById('serverListContainer');
+            const countSpan = document.getElementById('serverCount');
+            if (!container) return;
+
+            if (servers.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i>✨ 添加服务器，点击即连</i></div>`;
+                countSpan.textContent = '0';
+                return;
+            }
+
+            let html = '';
+            servers.forEach((server, index) => {
+                const displayAddr = server.address;
+                const displayPort = server.port;
+                // 用于显示的连接按钮，直接触发跳转
+                html += `
+                    <div class="server-item" data-index="${index}">
+                        <div class="server-info">
+                            <span class="server-addr">${escapeHtml(displayAddr)}</span>
+                            <span class="server-port">端口 ${escapeHtml(displayPort)}</span>
+                        </div>
+                        <div class="server-actions">
+                            <button class="connect-link" data-address="${escapeHtml(displayAddr)}" data-port="${escapeHtml(displayPort)}">▶ 连接</button>
+                            <button class="remove-btn" data-index="${index}">✕</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            countSpan.textContent = servers.length;
+
+            // 绑定连接事件 (点击链接跳转)
+            container.querySelectorAll('.connect-link').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const address = this.getAttribute('data-address');
+                    const port = this.getAttribute('data-port');
+                    if (address && port) {
+                        connectToServer(address, port);
+                    }
+                });
+            });
+
+            // 删除事件
+            container.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const idx = this.getAttribute('data-index');
+                    if (idx !== null) {
+                        const index = parseInt(idx, 10);
+                        if (!isNaN(index)) {
+                            removeServer(index);
+                        }
+                    }
+                });
+            });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text).replace(/[&<>"]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                if (m === '"') return '&quot;';
+                return m;
+            });
+        }
+
+        // ----- Toast -----
+        let toastTimer = null;
+        function showToast(message) {
+            const toast = document.getElementById('toastMessage');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ----- 初始化 -----
+        function init() {
+            loadServers();
+            renderServerList();
+
+            const inputField = document.getElementById('serverInput');
+            const addBtn = document.getElementById('addServerBtn');
+
+            addBtn.addEventListener('click', function() {
+                const raw = inputField.value;
+                const parsed = parseServerInput(raw);
+                if (!parsed) {
+                    showToast('⚠️ 格式错误，请使用 地址:端口');
+                    return;
+                }
+                const success = addServer(parsed.address, parsed.port);
+                if (success) {
+                    inputField.value = '';
+                    inputField.focus();
+                }
+            });
+
+            inputField.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addBtn.click();
+                }
+            });
+
+            document.getElementById('clearAllBtn').addEventListener('click', clearAllServers);
+            document.getElementById('exampleBtn').addEventListener('click', addExampleServers);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+</script>
+</body>
+</html>
