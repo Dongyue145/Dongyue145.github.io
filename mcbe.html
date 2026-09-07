@@ -1,666 +1,406 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>一键连接 · Minecraft BE 服务器</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            background: #0d111f;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
-            padding: 20px;
-        }
-        .container {
-            max-width: 640px;
-            width: 100%;
-            background: #181e2f;
-            border-radius: 44px;
-            padding: 28px 24px 32px;
-            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
-            border: 1px solid #2f3650;
-        }
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        .header h1 {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #eef3fc;
-            font-weight: 650;
-            font-size: 26px;
-            letter-spacing: -0.3px;
-        }
-        .header h1 small {
-            font-size: 15px;
-            font-weight: 400;
-            background: #28304a;
-            padding: 4px 14px;
-            border-radius: 40px;
-            color: #b0bddb;
-            border: 1px solid #3d4669;
-        }
-        .badge {
-            background: #1f2740;
-            border-radius: 40px;
-            padding: 6px 16px;
-            color: #b8c4e5;
-            font-size: 14px;
-            border: 1px solid #3b4468;
-        }
-        .subhead {
-            color: #9ba6ca;
-            font-size: 15px;
-            padding-bottom: 18px;
-            border-bottom: 1px solid #29304b;
-            margin-bottom: 28px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-        }
-        .subhead span {
-            background: #1f2740;
-            padding: 2px 14px;
-            border-radius: 30px;
-            border: 1px solid #3d466b;
-            font-size: 13px;
-            color: #c9d3f0;
-        }
-        .input-area {
-            margin-bottom: 30px;
-        }
-        .input-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            color: #d0d9f0;
-            font-size: 15px;
-            margin-bottom: 10px;
-        }
-        .input-label i {
-            background: #212a44;
-            padding: 0 14px;
-            border-radius: 40px;
-            font-size: 13px;
-            color: #a7b3db;
-            border: 1px solid #3a4368;
-            font-style: normal;
-        }
-        .input-row {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 12px;
-            background: #131a2b;
-            padding: 4px 4px 4px 20px;
-            border-radius: 80px;
-            border: 1px solid #353e60;
-            transition: 0.2s;
-        }
-        .input-row:focus-within {
-            border-color: #6f83d1;
-            box-shadow: 0 0 0 3px rgba(80, 115, 220, 0.25);
-            background: #101725;
-        }
-        .input-row input {
-            flex: 1;
-            min-width: 150px;
-            background: transparent;
-            border: none;
-            padding: 16px 6px 16px 0;
-            font-size: 16px;
-            color: #ecf2fd;
-            outline: none;
-            font-weight: 450;
-        }
-        .input-row input::placeholder {
-            color: #56608a;
-            font-size: 15px;
-        }
-        .input-row button {
-            background: #4f65a0;
-            border: none;
-            color: white;
-            font-weight: 600;
-            font-size: 15px;
-            padding: 11px 28px;
-            border-radius: 60px;
-            cursor: pointer;
-            transition: 0.15s;
-            border: 1px solid #687ec2;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            white-space: nowrap;
-            letter-spacing: 0.4px;
-        }
-        .input-row button:hover {
-            background: #5d78b5;
-            border-color: #7e93d4;
-            transform: scale(0.97);
-        }
-        .input-row button:active {
-            background: #3f5285;
-            transform: scale(0.94);
-        }
-        .list-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 18px 0 12px 0;
-            color: #c4ceec;
-            font-weight: 500;
-            padding: 0 4px;
-        }
-        .list-header span:first-child {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .list-header .count {
-            background: #1e2742;
-            padding: 0 16px;
-            border-radius: 40px;
-            font-size: 14px;
-            border: 1px solid #3a436a;
-        }
-        .server-list {
-            background: #131a2b;
-            border-radius: 28px;
-            padding: 6px 4px;
-            border: 1px solid #2f3655;
-            max-height: 360px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #3d4a74 #131a2b;
-        }
-        .server-list::-webkit-scrollbar {
-            width: 5px;
-        }
-        .server-list::-webkit-scrollbar-track {
-            background: #0f1423;
-            border-radius: 10px;
-        }
-        .server-list::-webkit-scrollbar-thumb {
-            background: #46537e;
-            border-radius: 10px;
-        }
-        .server-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 18px;
-            margin: 4px 6px;
-            background: #1c243d;
-            border-radius: 60px;
-            border: 1px solid #2f385b;
-            flex-wrap: wrap;
-            gap: 10px 6px;
-            transition: 0.1s;
-        }
-        .server-item:hover {
-            background: #222b49;
-            border-color: #445082;
-        }
-        .server-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            flex: 2;
-            min-width: 130px;
-        }
-        .server-addr {
-            font-weight: 600;
-            color: #e7edff;
-            font-size: 16px;
-            word-break: break-all;
-        }
-        .server-port {
-            font-size: 13px;
-            color: #8d9ac6;
-            background: #101a2e;
-            padding: 0 14px;
-            border-radius: 30px;
-            display: inline-block;
-            width: fit-content;
-            border: 1px solid #334066;
-        }
-        .server-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .server-actions .connect-link {
-            background: #3d5a94;
-            border: 1px solid #5b78bc;
-            color: white;
-            padding: 8px 22px;
-            border-radius: 60px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.15s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
-            letter-spacing: 0.2px;
-        }
-        .server-actions .connect-link:hover {
-            background: #4e70b0;
-            border-color: #738cd6;
-            transform: scale(0.97);
-        }
-        .server-actions .connect-link:active {
-            background: #314a7a;
-            transform: scale(0.94);
-        }
-        .server-actions .remove-btn {
-            background: #352f46;
-            border: 1px solid #544b6b;
-            color: #cfc6e6;
-            padding: 6px 16px;
-            border-radius: 60px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.1s;
-            font-weight: 500;
-        }
-        .server-actions .remove-btn:hover {
-            background: #4d3f5c;
-            border-color: #735d7e;
-            color: #efe6ff;
-        }
-        .empty-state {
-            color: #6873a0;
-            text-align: center;
-            padding: 36px 12px;
-            font-size: 16px;
-        }
-        .empty-state i {
-            background: #1b2340;
-            padding: 6px 20px;
-            border-radius: 60px;
-            border: 1px dashed #3d4877;
-            font-style: normal;
-        }
-        .footer-actions {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-top: 24px;
-            flex-wrap: wrap;
-            border-top: 1px solid #272f4d;
-            padding-top: 22px;
-        }
-        .footer-actions button {
-            background: transparent;
-            border: 1px solid #3a436a;
-            color: #b3bee5;
-            padding: 8px 24px;
-            border-radius: 60px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.15s;
-            font-weight: 450;
-        }
-        .footer-actions button:hover {
-            background: #1f2846;
-            border-color: #5c6ba0;
-            color: #e4edff;
-        }
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #141d35;
-            color: #d6e0fc;
-            padding: 14px 32px;
-            border-radius: 80px;
-            border: 1px solid #5c71b0;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            font-weight: 500;
-            font-size: 15px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s;
-            z-index: 999;
-            white-space: nowrap;
-        }
-        .toast.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        @media (max-width: 480px) {
-            .container { padding: 20px 14px; }
-            .input-row { padding-left: 16px; }
-            .server-item { flex-direction: column; align-items: stretch; }
-            .server-actions { justify-content: flex-end; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>一键导入 · Minecraft 服务器</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      margin: 0;
+      padding: 16px;
+    }
+
+    .import-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 500px;
+      gap: 16px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 1.15rem;
+      font-weight: 600;
+      padding: 16px 28px;
+      border: none;
+      border-radius: 60px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.3px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transform: scale(1);
+      will-change: transform;
+      line-height: 1.2;
+      flex: 1 1 auto;
+      min-width: 160px;
+      max-width: 100%;
+    }
+
+    .mc-btn:active {
+      transform: scale(0.96);
+      transition-duration: 0.04s;
+    }
+
+    .mc-btn:focus-visible {
+      outline: 3px solid #2b6b9c;
+      outline-offset: 2px;
+    }
+
+    .mc-import-btn {
+      background: #1e2a3a;
+      color: #ffffff;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+
+    .mc-import-btn:hover {
+      background: #253544;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .mc-import-btn:active {
+      background: #0f1a26;
+    }
+
+    .mc-copy-btn {
+      background: #ffffff;
+      color: #1e2a3a;
+      border: 2px solid #d0d7de;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+
+    .mc-copy-btn:hover {
+      background: #f6f8fa;
+      border-color: #b0b8c0;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .mc-copy-btn:active {
+      background: #eaeef2;
+    }
+
+    .mc-copy-btn .icon-copy {
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .mc-copy-btn.copied {
+      background: #2d7a4f;
+      border-color: #2d7a4f;
+      color: #ffffff;
+    }
+
+    .mc-copy-btn.copied:hover {
+      background: #23633f;
+      border-color: #23633f;
+    }
+
+    .mc-import-btn .icon-minecraft {
+      display: inline-block;
+      font-size: 1.4rem;
+      line-height: 1;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+    }
+
+    .server-info {
+      font-size: 0.85rem;
+      color: #6a7a8a;
+      background: rgba(0, 0, 0, 0.02);
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(0,0,0,0.04);
+      letter-spacing: 0.2px;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .server-info span {
+      background: rgba(0,0,0,0.04);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-family: 'SF Mono', 'Consolas', monospace;
+      font-size: 0.8rem;
+      color: #2a3a4a;
+    }
+
+    .toast-tip {
+      font-size: 0.9rem;
+      color: #3a4a5a;
+      background: rgba(0, 0, 0, 0.03);
+      padding: 8px 18px;
+      border-radius: 40px;
+      letter-spacing: 0.2px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+      white-space: nowrap;
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .toast-tip.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hidden-copy-input {
+      position: absolute;
+      left: -9999px;
+      top: -9999px;
+      opacity: 0;
+      pointer-events: none;
+      width: 1px;
+      height: 1px;
+    }
+
+    @media (max-width: 480px) {
+      .mc-btn {
+        font-size: 1rem;
+        padding: 14px 20px;
+        min-width: 130px;
+      }
+      .mc-import-btn .icon-minecraft {
+        font-size: 1.2rem;
+      }
+      .toast-tip {
+        font-size: 0.8rem;
+        padding: 6px 14px;
+        white-space: normal;
+        text-align: center;
+        max-width: 90vw;
+      }
+      .btn-group {
+        gap: 10px;
+      }
+      .server-info {
+        font-size: 0.75rem;
+        padding: 4px 12px;
+      }
+      .server-info span {
+        font-size: 0.7rem;
+        padding: 1px 8px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .btn-group {
+        flex-direction: column;
+        align-items: center;
+      }
+      .mc-btn {
+        width: 100%;
+        max-width: 280px;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1>
-            ⛏️ 一键连接
-            <small>BE 1.20+</small>
-        </h1>
-        <div class="badge">⚡ 点击链接跳转游戏</div>
-    </div>
-    <div class="subhead">
-        <span>📌 添加服务器</span>
-        <span>格式: 地址:端口</span>
-        <span style="background: #1b2440; border-color:#3f4a78;">点击「连接」直接启动</span>
+  <div class="import-wrapper">
+    <!-- 服务器信息显示 -->
+    <div class="server-info">
+      🖥️ 服务器 <span>139.199.61.116</span> 端口 <span>19132</span>
     </div>
 
-    <div class="input-area">
-        <div class="input-label">
-            <span>🌐 服务器地址</span>
-            <i>例如 play.example.com:19132</i>
-        </div>
-        <div class="input-row">
-            <input type="text" id="serverInput" placeholder="mc.example.com:19132" spellcheck="false" autocomplete="off">
-            <button id="addServerBtn">➕ 导入</button>
-        </div>
+    <!-- 两个按钮 -->
+    <div class="btn-group">
+      <button class="mc-btn mc-import-btn" id="importServerBtn">
+        <span class="icon-minecraft" aria-hidden="true">⛏️</span>
+        <span class="btn-text" id="importBtnText">一键导入</span>
+      </button>
+
+      <button class="mc-btn mc-copy-btn" id="copyServerBtn">
+        <span class="icon-copy" aria-hidden="true">📋</span>
+        <span class="btn-text" id="copyBtnText">复制链接</span>
+      </button>
     </div>
 
-    <div class="list-header">
-        <span>📋 我的服务器</span>
-        <span class="count" id="serverCount">0</span>
-    </div>
-    <div class="server-list" id="serverListContainer">
-        <div class="empty-state"><i>✨ 添加服务器，点击即连</i></div>
-    </div>
+    <!-- 提示浮层 -->
+    <div class="toast-tip" id="toastTip">📋 链接已复制</div>
 
-    <div class="footer-actions">
-        <button id="clearAllBtn">🗑️ 清空全部</button>
-        <button id="exampleBtn">📌 添加示例</button>
-        <span style="color: #5d6a97; font-size: 13px; display: inline-flex; align-items: center;">点击连接自动跳转</span>
-    </div>
-</div>
+    <!-- 隐藏输入域 -->
+    <input type="text" id="copyInput" class="hidden-copy-input" readonly value="">
+  </div>
 
-<div id="toastMessage" class="toast"></div>
+  <script>
+    (function() {
+      "use strict";
 
-<script>
-    (function(){
-        const STORAGE_KEY = 'mcbe_server_list_quick';
-        let servers = [];
+      // ===== 服务器配置 =====
+      const SERVER_NAME = "⭐ 我的世界服务器";
+      const SERVER_HOST = "139.199.61.116";
+      const SERVER_PORT = "19132";
 
-        // ----- 存储 -----
-        function loadServers() {
-            try {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    if (Array.isArray(parsed)) {
-                        servers = parsed.filter(s => s && typeof s.address === 'string' && typeof s.port === 'string');
-                        return;
-                    }
-                }
-            } catch (_) {}
-            servers = [];
+      function buildMinecraftUrl(name, host, port) {
+        const safePort = (port && port.trim() !== "") ? port : "19132";
+        const encodedName = encodeURIComponent(name);
+        return `minecraft://?addServer=${encodedName}|${host}|${safePort}`;
+      }
+
+      const serverUrl = buildMinecraftUrl(SERVER_NAME, SERVER_HOST, SERVER_PORT);
+
+      // ----- DOM 引用 -----
+      const importBtn = document.getElementById('importServerBtn');
+      const importBtnText = document.getElementById('importBtnText');
+      const copyBtn = document.getElementById('copyServerBtn');
+      const copyBtnText = document.getElementById('copyBtnText');
+      const toastTip = document.getElementById('toastTip');
+      const copyInput = document.getElementById('copyInput');
+
+      copyInput.value = serverUrl;
+
+      // ----- Toast 控制 -----
+      let toastTimer = null;
+      function showToast(message, duration = 2500) {
+        toastTip.textContent = message;
+        toastTip.classList.add('show');
+        if (toastTimer) {
+          clearTimeout(toastTimer);
+          toastTimer = null;
         }
-
-        function saveServers() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(servers));
-            } catch (_) {}
+        if (duration > 0) {
+          toastTimer = setTimeout(() => {
+            toastTip.classList.remove('show');
+            toastTimer = null;
+          }, duration);
         }
+      }
 
-        // ----- 解析与添加 -----
-        function parseServerInput(raw) {
-            let trimmed = raw.trim();
-            if (!trimmed) return null;
-            let addressPart, portPart;
-            if (trimmed.includes(':')) {
-                const idx = trimmed.lastIndexOf(':');
-                addressPart = trimmed.substring(0, idx).trim();
-                portPart = trimmed.substring(idx + 1).trim();
-            } else {
-                addressPart = trimmed;
-                portPart = '19132';
-            }
-            if (!addressPart) return null;
-            if (!/^\d+$/.test(portPart)) return null;
-            const portNum = parseInt(portPart, 10);
-            if (portNum < 1 || portNum > 65535) return null;
-            return { address: addressPart, port: portPart };
-        }
+      // ----- 复制功能（独立） -----
+      function copyServerLink() {
+        let copied = false;
 
-        function addServer(address, port) {
-            address = address.trim();
-            port = port.trim();
-            if (!address || !port) return false;
-            const exists = servers.some(s => 
-                s.address.toLowerCase() === address.toLowerCase() && s.port === port
-            );
-            if (exists) {
-                showToast('⚠️ 服务器已存在');
-                return false;
-            }
-            servers.push({ address, port });
-            saveServers();
-            renderServerList();
-            showToast(`✅ 已导入 ${address}:${port}`);
-            return true;
-        }
-
-        function removeServer(index) {
-            if (index >= 0 && index < servers.length) {
-                const removed = servers[index];
-                servers.splice(index, 1);
-                saveServers();
-                renderServerList();
-                showToast(`已移除 ${removed.address}:${removed.port}`);
-            }
-        }
-
-        function clearAllServers() {
-            if (servers.length === 0) {
-                showToast('列表已经是空的');
-                return;
-            }
-            if (confirm('确定清空所有服务器吗？')) {
-                servers = [];
-                saveServers();
-                renderServerList();
-                showToast('已清空所有服务器');
-            }
-        }
-
-        function addExampleServers() {
-            const examples = [
-                { address: 'play.netherite.net', port: '19132' },
-                { address: 'mc.example.com', port: '19132' },
-                { address: 'bedrock.pvpcraft.net', port: '19132' }
-            ];
-            let added = 0;
-            for (const ex of examples) {
-                const exists = servers.some(s => 
-                    s.address.toLowerCase() === ex.address.toLowerCase() && s.port === ex.port
-                );
-                if (!exists) {
-                    servers.push({ address: ex.address, port: ex.port });
-                    added++;
-                }
-            }
-            if (added > 0) {
-                saveServers();
-                renderServerList();
-                showToast(`✅ 添加了 ${added} 个示例服务器`);
-            } else {
-                showToast('示例服务器已存在');
-            }
-        }
-
-        // ----- 核心: 生成 minecraft:// 链接并跳转 -----
-        function connectToServer(address, port) {
-            // 构建 Bedrock 专用链接: minecraft://?addExternalServer=名称|地址:端口
-            // 使用地址作为名称 (简单处理)
-            const name = address.length > 20 ? address.substring(0, 18) + '..' : address;
-            // 对名称进行url编码，但保留可读性，同时处理特殊字符
-            const encodedName = encodeURIComponent(name);
-            const serverAddress = `${address}:${port}`;
-            // 标准格式: minecraft://?addExternalServer=名称|地址:端口
-            const url = `minecraft://?addExternalServer=${encodedName}|${serverAddress}`;
-            
-            // 尝试跳转
-            try {
-                window.location.href = url;
-                showToast(`🚀 正在连接 ${address}:${port} ...`);
-                // 如果跳转失败，部分浏览器会阻止，但多数移动端会唤起游戏
-                // 5秒后提示如果未跳转
-                setTimeout(() => {
-                    showToast(`如果游戏未启动，请手动输入 /connect ${address}:${port}`);
-                }, 3500);
-            } catch (e) {
-                showToast(`⚠️ 无法跳转，请手动输入 /connect ${address}:${port}`);
-            }
-        }
-
-        // ----- 渲染列表 -----
-        function renderServerList() {
-            const container = document.getElementById('serverListContainer');
-            const countSpan = document.getElementById('serverCount');
-            if (!container) return;
-
-            if (servers.length === 0) {
-                container.innerHTML = `<div class="empty-state"><i>✨ 添加服务器，点击即连</i></div>`;
-                countSpan.textContent = '0';
-                return;
-            }
-
-            let html = '';
-            servers.forEach((server, index) => {
-                const displayAddr = server.address;
-                const displayPort = server.port;
-                // 用于显示的连接按钮，直接触发跳转
-                html += `
-                    <div class="server-item" data-index="${index}">
-                        <div class="server-info">
-                            <span class="server-addr">${escapeHtml(displayAddr)}</span>
-                            <span class="server-port">端口 ${escapeHtml(displayPort)}</span>
-                        </div>
-                        <div class="server-actions">
-                            <button class="connect-link" data-address="${escapeHtml(displayAddr)}" data-port="${escapeHtml(displayPort)}">▶ 连接</button>
-                            <button class="remove-btn" data-index="${index}">✕</button>
-                        </div>
-                    </div>
-                `;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(serverUrl)
+            .then(() => {
+              copied = true;
+              showCopySuccess();
+            })
+            .catch(() => {
+              fallbackCopy();
             });
-
-            container.innerHTML = html;
-            countSpan.textContent = servers.length;
-
-            // 绑定连接事件 (点击链接跳转)
-            container.querySelectorAll('.connect-link').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const address = this.getAttribute('data-address');
-                    const port = this.getAttribute('data-port');
-                    if (address && port) {
-                        connectToServer(address, port);
-                    }
-                });
-            });
-
-            // 删除事件
-            container.querySelectorAll('.remove-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const idx = this.getAttribute('data-index');
-                    if (idx !== null) {
-                        const index = parseInt(idx, 10);
-                        if (!isNaN(index)) {
-                            removeServer(index);
-                        }
-                    }
-                });
-            });
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            return String(text).replace(/[&<>"]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                if (m === '"') return '&quot;';
-                return m;
-            });
-        }
-
-        // ----- Toast -----
-        let toastTimer = null;
-        function showToast(message) {
-            const toast = document.getElementById('toastMessage');
-            if (!toast) return;
-            toast.textContent = message;
-            toast.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // ----- 初始化 -----
-        function init() {
-            loadServers();
-            renderServerList();
-
-            const inputField = document.getElementById('serverInput');
-            const addBtn = document.getElementById('addServerBtn');
-
-            addBtn.addEventListener('click', function() {
-                const raw = inputField.value;
-                const parsed = parseServerInput(raw);
-                if (!parsed) {
-                    showToast('⚠️ 格式错误，请使用 地址:端口');
-                    return;
-                }
-                const success = addServer(parsed.address, parsed.port);
-                if (success) {
-                    inputField.value = '';
-                    inputField.focus();
-                }
-            });
-
-            inputField.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addBtn.click();
-                }
-            });
-
-            document.getElementById('clearAllBtn').addEventListener('click', clearAllServers);
-            document.getElementById('exampleBtn').addEventListener('click', addExampleServers);
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
         } else {
-            init();
+          fallbackCopy();
         }
+
+        setTimeout(() => {
+          if (!copied) {
+            showToast('📋 请手动复制链接', 3000);
+          }
+        }, 400);
+      }
+
+      function fallbackCopy() {
+        try {
+          copyInput.value = serverUrl;
+          copyInput.select();
+          copyInput.setSelectionRange(0, 99999);
+          const success = document.execCommand('copy');
+          if (success) {
+            showCopySuccess();
+          } else {
+            showToast('📋 请手动复制链接', 3000);
+          }
+        } catch (e) {
+          showToast('📋 请手动复制链接', 3000);
+        }
+        copyInput.blur();
+      }
+
+      function showCopySuccess() {
+        copyBtn.classList.add('copied');
+        const originalText = copyBtnText.textContent;
+        copyBtnText.textContent = '✅ 已复制';
+        showToast('✅ 链接已复制！', 2000);
+
+        setTimeout(() => {
+          copyBtn.classList.remove('copied');
+          copyBtnText.textContent = originalText;
+        }, 2500);
+      }
+
+      // ----- 导入功能（跳转唤起）-----
+      function importServer() {
+        try {
+          window.location.href = serverUrl;
+
+          const iframe = document.createElement('iframe');
+          iframe.style.display = 'none';
+          iframe.src = serverUrl;
+          document.body.appendChild(iframe);
+          setTimeout(() => {
+            if (iframe.parentNode) {
+              iframe.parentNode.removeChild(iframe);
+            }
+          }, 3000);
+        } catch (e) {
+          showToast('⚠️ 无法唤起，请点击"复制链接"手动添加', 3000);
+        }
+
+        importBtnText.textContent = '🚀 正在导入...';
+        setTimeout(() => {
+          importBtnText.textContent = '一键导入';
+        }, 2000);
+      }
+
+      // ----- 绑定事件 -----
+      copyBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (copyBtn.classList.contains('copied')) {
+          copyBtn.classList.remove('copied');
+          copyBtnText.textContent = '复制链接';
+        }
+        copyServerLink();
+      });
+
+      importBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        importServer();
+      });
+
+      [copyBtn, importBtn].forEach(btn => {
+        btn.addEventListener('touchstart', function(e) {
+          // 提升触感
+        }, { passive: true });
+      });
+
+      console.log('[Minecraft] 服务器链接:', serverUrl);
+      console.log('💡 服务器IP: 139.199.61.116 : 19132');
     })();
-</script>
+  </script>
 </body>
 </html>
